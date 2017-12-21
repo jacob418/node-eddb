@@ -1,6 +1,6 @@
 (function(){
+	const fs = require('fs') ;
 	const mysql = require("mysql");
-	
 
 	var databaseManager = function databaseManager(config){
 		if(config.constructor !== {}.constructor){
