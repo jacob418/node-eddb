@@ -15,7 +15,7 @@
 		}) ;
 	} ;
 
-	databaseManager.prototype.initDatabase = function initDatabase(){
+	databaseManager.prototype.initDatabase = function initDatabase(cb){
 
 	} ;
 
