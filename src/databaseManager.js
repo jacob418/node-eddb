@@ -3,5 +3,5 @@
 
 	} ;
 
-	module.exports = new databaseManager() ;
+	module.exports = databaseManager ;
 })() ;
