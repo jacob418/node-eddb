@@ -1,4 +1,6 @@
 (function(){
+	const mysql = require("node-mysql");
+
 	var databaseManager = function databaseManager(config){
 		if(config.constructor !== {}.constructor){
 			throw new Error("given parameter is not a valid JSON") ;
