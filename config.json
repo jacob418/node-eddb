@@ -1,3 +1,8 @@
 {
-  
+	"mysql":{
+		"user": "jacobf",
+		"pass": "pass1234",
+		"host": "mysql.sense-it.gmbh",
+		"db": "jacobf_eddb"
+	}
 }
