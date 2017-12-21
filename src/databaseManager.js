@@ -1,5 +1,5 @@
 (function(){
-	var databaseManager = function databaseManager(){
+	var databaseManager = function databaseManager(config){
 
 	} ;
 
