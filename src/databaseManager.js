@@ -12,5 +12,9 @@
 		}) ;
 	} ;
 
+	databaseManager.prototype.initDatabase = function initDatabase(){
+
+	} ;
+
 	module.exports = databaseManager ;
 })() ;
