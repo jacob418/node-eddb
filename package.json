@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/jacob418/node-eddb/issues"
   },
-  "homepage": "https://github.com/jacob418/node-eddb#readme"
+  "homepage": "https://github.com/jacob418/node-eddb#readme",
+  "dependencies": {
+    "node-mysql": "^0.4.2"
+  }
 }
