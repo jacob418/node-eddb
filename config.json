@@ -4,5 +4,9 @@
 		"pass": "pass1234",
 		"host": "mysql.sense-it.gmbh",
 		"db": "jacobf_eddb"
+	},
+	"eddb":{
+		"systems": "https://eddb.io/archive/v5/systems_populated.jsonl",
+		"factions":	"https://eddb.io/archive/v5/factions.jsonl"
 	}
 }
