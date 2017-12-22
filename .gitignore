@@ -62,3 +62,4 @@ typings/
 # CUSTOM:
 .idea
 /package-lock.json
+/data/
