@@ -15,7 +15,7 @@
 	} ;
 
 	databaseManager.prototype.initDatabase = function initDatabase(cb){
-		fs.readFile('./sql/createTable.sql', function(err, query) {
+		fs.readFile('./sql/createTables.sql', 'utf8', function(err, query) {
 			if(err){
 				cb(err) ;
 			} else {
