@@ -45,7 +45,7 @@
 					}
 				});
 			}
-		});
+		}.bind(this));
 	} ;
 
 	module.exports = function(config){return new databaseManager(config)} ;
