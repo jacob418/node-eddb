@@ -21,6 +21,10 @@
   },
   "homepage": "https://github.com/jacob418/node-eddb#readme",
   "dependencies": {
-    "mysql": "^2.15.0"
+    "async": "^2.6.0",
+    "hash-files": "^1.1.1",
+    "merge-json": "0.1.0-b.3",
+    "mysql": "^2.15.0",
+    "request": "^2.83.0"
   }
 }
