@@ -41,7 +41,13 @@
 
 						cb(err) ;
 					} else {
-						// ....
+						connection.query(query, function (err, results, fields) {
+							if(err){
+								cb(err) ;
+							} else {
+								cb(err, results) ;
+							}
+						}) ;
 					}
 				});
 			}
