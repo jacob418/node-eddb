@@ -46,5 +46,5 @@
 
 	} ;
 
-	module.exports = fileParser ;
+	module.exports = function(){return new fileParser()} ;
 })() ;

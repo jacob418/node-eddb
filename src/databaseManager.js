@@ -49,5 +49,5 @@
 		});
 	} ;
 
-	module.exports = databaseManager ;
+	module.exports = function(config){return new databaseManager(config)} ;
 })() ;
