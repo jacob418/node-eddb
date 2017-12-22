@@ -10,12 +10,15 @@ const databaseManager = require('./src/databaseManager')(config.mysql) ;
 			databaseManager.initDatabase(function (err, result) {
 				if (err) {
 					console.log(err);
+					process.exit(1) ;
 				} else {
-					console.log(result);
+					process.exit(0) ;
 				}
 			});
 			break ;
 		default:
 			throw new Error("no valid action specified") ;
 	}
+
+	return ;
 })() ;
