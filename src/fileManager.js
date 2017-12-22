@@ -2,11 +2,13 @@
 	const fs = require('fs') ;
 	const readline = require('readline');
 
-	var fileParser = function fileParser() {
-
+	var fileManager = function fileManager(eddbAPI) {
+		if(eddbAPI.constructor !== {}.constructor){
+			throw new Error("given parameter is not a valid JSON") ;
+		}
 	} ;
 
-	fileParser.prototype.readFile = function readFile(fileName, cbLine, cbEnd){
+	fileManager.prototype.readFile = function readFile(fileName, cbLine, cbEnd){
 
 		fs.stat(fileName, function(err,fileStats){
 			if(err){
@@ -46,5 +48,5 @@
 
 	} ;
 
-	module.exports = function(){return new fileParser()} ;
+	module.exports = function(){return new fileManager()} ;
 })() ;
