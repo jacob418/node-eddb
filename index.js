@@ -16,6 +16,16 @@ const databaseManager = require('./src/databaseManager')(config.mysql) ;
 				}
 			});
 			break ;
+		case "update":
+			fileManager.updateEddbJSON(function(err){
+				if(err) {
+					console.log(err);
+					process.exit(1) ;
+				}else{
+					process.exit(0) ;
+				}
+			}) ;
+			break ;
 		default:
 			throw new Error("no valid action specified") ;
 	}
