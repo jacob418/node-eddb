@@ -26,7 +26,8 @@
 					host: this.config.host,
 					user: this.config.user,
 					password: this.config.pass,
-					database: this.config.db
+					database: this.config.db,
+					multipleStatements: true,
 				});
 
 				connection.on('error', function(err){
