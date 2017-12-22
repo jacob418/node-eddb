@@ -1,5 +1,5 @@
 const config = require('./config.json') ;
-const fileManager = require('./src/fileManager')() ;
+const fileManager = require('./src/fileManager')(config.eddb) ;
 const databaseManager = require('./src/databaseManager')(config.mysql) ;
 
 (function(){

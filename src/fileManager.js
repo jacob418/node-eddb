@@ -6,6 +6,12 @@
 		if(eddbAPI.constructor !== {}.constructor){
 			throw new Error("given parameter is not a valid JSON") ;
 		}
+
+		Object.defineProperty(this, "eddbAPI", {
+			enumerable: true,
+			value: eddbAPI,
+			writable: false,
+		}) ;
 	} ;
 
 	fileManager.prototype.readFile = function readFile(fileName, cbLine, cbEnd){
@@ -48,5 +54,5 @@
 
 	} ;
 
-	module.exports = function(){return new fileManager()} ;
+	module.exports = function(eddbAPI){return new fileManager(eddbAPI)} ;
 })() ;
