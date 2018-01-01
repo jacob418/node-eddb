@@ -3,7 +3,14 @@
 		"user": "jacobf",
 		"pass": "pass1234",
 		"host": "mysql.sense-it.gmbh",
-		"db": "jacobf_eddb"
+		"db": "jacobf_eddb",
+		"queryDir": "sql",
+		"maxConnDuration": 10000,
+		"maxConnAmount": 5
+	},
+	"scheduler":{
+		"maxStackSize": 50,
+		"maxLinesPerQuery": 25
 	},
 	"eddb":{
 		"systems": "https://eddb.io/archive/v5/systems_populated.jsonl",
