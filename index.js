@@ -2,6 +2,7 @@ const config = require('./config.json') ;
 const fileManager = require('./src/fileManager')(config.eddb) ;
 const databaseManager = require('./src/databaseManager')(config.mysql) ;
 const eddnListener = require('./src/eddnListener')({}) ;
+const queryScheduler = require('./src/queryScheduler') ;
 
 (function(){
 	const action = (typeof process.argv[2] === "string" ? process.argv[2] : "") ;
