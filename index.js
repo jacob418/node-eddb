@@ -1,6 +1,7 @@
 const config = require('./config.json') ;
 const fileManager = require('./src/fileManager')(config.eddb) ;
 const databaseManager = require('./src/databaseManager')(config.mysql) ;
+const eddnListener = require('./src/eddnListener')({}) ;
 
 (function(){
 	const action = (typeof process.argv[2] === "string" ? process.argv[2] : "") ;
@@ -25,6 +26,9 @@ const databaseManager = require('./src/databaseManager')(config.mysql) ;
 					process.exit(0) ;
 				}
 			}) ;
+			break ;
+		case 'listen':
+			eddnListener.listen() ;
 			break ;
 		default:
 			throw new Error("no valid action specified") ;
