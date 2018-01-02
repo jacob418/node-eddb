@@ -58,6 +58,17 @@
 						if(err === null){
 							err = error ;
 						}
+	databaseManager.prototype.prepareQuery = function prepareQuery(name, data, cb){
+		var queryFileName = name + '.sql' ;
+		this.loadQuery(queryFileName,function(err, strQuery){
+			if(err){
+				cb(err) ;
+			} else {
+				strQuery = mysql.format(strQuery, data) ;
+				cb(null, strQuery) ;
+			}
+		}.bind(this))
+	} ;
 
 	databaseManager.prototype.initDatabase = function initDatabase(cb){
 		async.map(['createTables', 'fkCreate'], this.loadQuery, function(err, queries) {
