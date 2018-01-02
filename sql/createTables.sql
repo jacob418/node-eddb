@@ -11,14 +11,16 @@ CREATE TABLE starSystem (
 	powerId						INT(8)					NULL ,
 	powerStateId 				INT(8)		UNSIGNED	NULL ,
 	updatedAt 					INT(11)		UNSIGNED	NOT NULL ,
-	controllingMinorFactionId	INT(11)		UNSIGNED	NOT NULL
+	controllingMinorFactionId	INT(11)		UNSIGNED	NOT NULL ,
+	KEY(name)
 ) ;
 
 CREATE TABLE minorFaction (
 	id							INT(11)		UNSIGNED	NOT NULL	PRIMARY KEY	AUTO_INCREMENT ,
 	name						VARCHAR(50)				NOT NULL ,
 	governmentId				INT(8)		UNSIGNED	NOT NULL ,
-	allegianceId				INT(8)		UNSIGNED	NOT NULL
+	allegianceId				INT(8)		UNSIGNED	NOT NULL ,
+	KEY(name)
 ) ;
 
 CREATE TABLE security (
