@@ -66,7 +66,5 @@ CREATE TABLE starSystemHasMinorFaction(
 	pendingStateId		INT(8)		UNSIGNED	NULL ,
 	recoveringStateId	INT(8)		UNSIGNED	NULL ,
 	influence			FLOAT(7,4)	UNSIGNED	NOT NULL ,
-	FOREIGN KEY	(minorFactionId)	REFERENCES minorFaction	(id) ,
-	FOREIGN KEY	(starSystemId)		REFERENCES starSystem	(id) ,
 	UNIQUE INDEX (minorFactionId, starSystemId)
 ) ;
