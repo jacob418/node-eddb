@@ -1,4 +1,5 @@
 (function(){
+	const path = require('path') ;
 	const fs = require('fs') ;
 	const mysql = require("mysql");
 
@@ -7,11 +8,29 @@
 			throw new Error("given parameter is not a valid JSON") ;
 		}
 
+		var query_cache = {} ;
+
 		Object.defineProperty(this, "config", {
 			enumerable: true,
 			value: config,
 			writable: false,
 		}) ;
+
+		this.loadQuery = function loadQuery(name, cb) {
+			var fileName = path.join("./", this.config.queryDir ,name) ;
+			if(typeof query_cache[fileName] === "string") {
+				cb(null, query_cache[fileName]);
+			}else{
+				fs.readFile(fileName, 'utf8', function (err, content) {
+					if (err) {
+						cb(err);
+					} else {
+						query_cache[fileName] = content ;
+						cb(null, content);
+					}
+				});
+			}
+		}
 	} ;
 
 	databaseManager.prototype.initDatabase = function initDatabase(cb){
