@@ -75,6 +75,7 @@
 			} else {
 				this.getConnection(function(err, connection){
 					if(err){
+						connection.end() ;
 						cb(err) ;
 					} else {
 						async.mapSeries(queries, connection.query, function (err, results) {
@@ -87,6 +88,7 @@
 								}
 								cb(err, retResults);
 							}
+							connection.end() ;
 						}) ;
 					}
 				});
