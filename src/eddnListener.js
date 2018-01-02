@@ -34,8 +34,10 @@
 						var header = result.header;
 						var content = result.message;
 
-						if (schema === 'https://eddn.edcd.io/schemas/journal/1' && content.event === "FSDJump") {
-							// process the data ....
+						if (schema === 'https://eddn.edcd.io/schemas/journal/1'
+							&& content.event === "FSDJump"
+							&& content.Population && content.Population > 0) {
+							fireEvt('starSystem', content) ;
 						}
 					});
 				});
