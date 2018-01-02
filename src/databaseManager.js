@@ -2,6 +2,7 @@
 	const path = require('path') ;
 	const fs = require('fs') ;
 	const mysql = require("mysql");
+	const async = require("async") ;
 
 	var databaseManager = function databaseManager(config){
 		if(config.constructor !== {}.constructor){
@@ -58,13 +59,24 @@
 							err = error ;
 						}
 
+	databaseManager.prototype.initDatabase = function initDatabase(cb){
+		async.map(['createTables', 'fkCreate'], this.loadQuery, function(err, queries) {
+			if(err){
+				cb(err) ;
+			} else {
+				this.getConnection(function(err, connection){
+					if(err){
 						cb(err) ;
 					} else {
-						connection.query(query, function (err, results, fields) {
-							if(err){
-								cb(err) ;
+						async.mapSeries(queries, connection.query, function (err, results) {
+							if (err) {
+								cb(err);
 							} else {
-								cb(err, results) ;
+								var retResults = [];
+								for (var i = 0; i < results.length; i++) {
+									retResults.concat(results[i]);
+								}
+								cb(err, retResults);
 							}
 						}) ;
 					}
