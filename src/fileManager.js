@@ -29,73 +29,78 @@
 			fs.mkdirSync('./data');
 		}catch(e){}
 
-		var error = null ;
-		// get api file for systems
-		request(mergeJSON.merge(baseOpts, {url: this.eddbAPI.systems}), function (err, response, body) {
-			if(error || err){
-				if(error){
-					err = error ;
-				} else {
-					error = err ;
-				}
-				cb(err) ;
-			} else {
-				fs.writeFile('./data/systems-tmp.jsonl', body, function(err) {
-					if (err) {
-						cb(err);
-					}else{
-						fs.appendFileSync('./data/systems.jsonl', "") ;
-						this.replaceIfNotEqual(['./data/systems.jsonl','./data/systems-tmp.jsonl'], function(err, replaced) {
-								if(err){
-									console.log(err) ;
-								} else {
-									if(replaced){
-										console.log("Systems-API has been updated") ;
+		async.parallel([
+			function(parallelCb){
+				request(mergeJSON.merge(baseOpts, {url: this.eddbAPI.systems}), function (err, response, body) {
+					if(err){
+						parallelCb(err) ;
+					} else {
+						fs.writeFile('./data/systems-tmp.jsonl', body, function(err) {
+							if (err) {
+								parallelCb(err);
+							}else{
+								fs.appendFileSync('./data/systems.jsonl', "") ;
+								this.replaceIfNotEqual(['./data/systems.jsonl','./data/systems-tmp.jsonl'], function(err, replaced) {
+									if(err){
+										parallelCb(err) ;
 									} else {
-										// delete temp file if nothing was replaced
-										fs.unlinkSync('./data/systems-tmp.jsonl') ;
-										console.log("Systems-API has not changed") ;
+										if(replaced){
+											console.log("Systems-API has been updated") ;
+										} else {
+											// delete temp file if nothing was replaced
+											fs.unlinkSync('./data/systems-tmp.jsonl') ;
+											console.log("Systems-API has not changed") ;
+										}
+										parallelCb(null, replaced) ;
 									}
-								}
-							});
+								});
+							}
+						}.bind(this)) ;
 					}
-				}.bind(this)) ;
+				}.bind(this));
+			}.bind(this),
+
+			function(parallelCb){
+				request(mergeJSON.merge(baseOpts, {url: this.eddbAPI.factions}), function (err, response, body) {
+					if(err){
+						parallelCb(err) ;
+					} else {
+						fs.writeFile('./data/factions-tmp.jsonl', body, function(err) {
+							if (err) {
+								parallelCb(err);
+							}else{
+								fs.appendFileSync('./data/factions.jsonl', "") ;
+								this.replaceIfNotEqual(['./data/factions.jsonl','./data/factions-tmp.jsonl'], function(err, replaced) {
+									if(err){
+										parallelCb(err) ;
+									} else {
+										if(replaced){
+											console.log("Factions-API has been updated") ;
+										} else {
+											// delete temp file if nothing was replaced
+											fs.unlinkSync('./data/factions-tmp.jsonl') ;
+											console.log("Factions-API has not changed") ;
+										}
+										parallelCb(null, replaced) ;
+									}
+								});
+							}
+						}.bind(this)) ;
+					}
+				}.bind(this));
+			}.bind(this),
+		], function(err, results){
+			if(err){
+				cb(err) ;
+			}else{
+				cb(null, results) ;
 			}
-		}.bind(this));
+		}) ;
+
 
 
 		// get api file for factions
-		request(mergeJSON.merge(baseOpts, {url: this.eddbAPI.factions}), function (err, response, body) {
-			if(error || err){
-				if(error){
-					err = error ;
-				} else {
-					error = err ;
-				}
-				cb(err) ;
-			} else {
-				fs.writeFile('./data/factions-tmp.jsonl', body, function(err) {
-					if (err) {
-						cb(err);
-					}else{
-						fs.appendFileSync('./data/factions.jsonl', "") ;
-						this.replaceIfNotEqual(['./data/factions.jsonl','./data/factions-tmp.jsonl'], function(err, replaced) {
-							if(err){
-								console.log(err) ;
-							} else {
-								if(replaced){
-									console.log("Factions-API has been updated") ;
-								} else {
-									// delete temp file if nothing was replaced
-									fs.unlinkSync('./data/factions-tmp.jsonl') ;
-									console.log("Factions-API has not changed") ;
-								}
-							}
-						});
-					}
-				}.bind(this)) ;
-			}
-		}.bind(this));
+
 	} ;
 
 
@@ -149,10 +154,11 @@
 							lines++;
 							try {
 								var lineData = JSON.parse(lineText);
-								cbLine(null, lineData) ;
 							} catch (e) {
-								cbLine(e) ;
+								ifstream.destroy() ;
+								cbEnd(e) ;
 							}
+							cbLine(null, lineData) ;
 						} else {
 							cbEnd(null,lines) ;
 						}
