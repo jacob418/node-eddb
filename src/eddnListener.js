@@ -35,8 +35,7 @@
 						var content = result.message;
 
 						if (schema === 'https://eddn.edcd.io/schemas/journal/1' && content.event === "FSDJump") {
-
-
+							// process the data ....
 						}
 					});
 				});
