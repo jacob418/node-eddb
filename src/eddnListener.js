@@ -18,7 +18,7 @@
 
 		var listeners = {} ;
 
-		this.listen = function listen(cb) {
+		this.listen = function listen() {
 			if (!sock) {
 				sock = zmq.socket('sub');
 				sock.connect('tcp://eddn.edcd.io:9500');
