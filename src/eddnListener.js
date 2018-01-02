@@ -50,6 +50,16 @@
 
 			listeners[evt].push(cb) ;
 		} ;
+
+		var fireEvt = function(name, data){
+			if(Array.isArray(listeners[name])){
+				for(var i = 0; i < listeners[name].length; i++){
+					if(typeof listeners[name][i] === "function"){
+						listeners[name][i](data) ;
+					}
+				}
+			}
+		}
 	} ;
 
 
