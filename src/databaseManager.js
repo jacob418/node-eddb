@@ -34,29 +34,27 @@
 		}
 	} ;
 
-	databaseManager.prototype.initDatabase = function initDatabase(cb){
-		fs.readFile('./sql/createTables.sql', 'utf8', function(err, query) {
-			if(err){
-				cb(err) ;
+	databaseManager.prototype.getConnection = function getConnection(cb, multiple) {
+		multiple = !! multiple ;
+		var connection = mysql.createConnection({
+			host: this.config.host,
+			user: this.config.user,
+			password: this.config.pass,
+			database: this.config.db,
+			multipleStatements: multiple,
+		});
+
+		connection.connect(function (err) {
+			if (err) {
+				connection.end();
+				cb(err);
 			} else {
-				var error = null ;
+				cb(null, connection) ;
+			}
+		}) ;
 
-				var connection = mysql.createConnection({
-					host: this.config.host,
-					user: this.config.user,
-					password: this.config.pass,
-					database: this.config.db,
-					multipleStatements: true,
-				});
+	} ;
 
-				connection.on('error', function(err){
-					error = err ;
-				}) ;
-
-				connection.connect(function(err){
-					if(err || error !== null){
-						if(err === null){
-							err = error ;
 						}
 	databaseManager.prototype.prepareQuery = function prepareQuery(name, data, cb){
 		var queryFileName = name + '.sql' ;
