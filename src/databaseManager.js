@@ -202,5 +202,46 @@
 		}.bind(this));
 	} ;
 
+	databaseManager.prototype.getId = function getId(type ,name, cb){
+		var querySelect = "SELECT * FROM " + type + " WHERE name = ? LIMIT 1;" ;
+		var queryInsert = "INSERT INTO " + type + " name = ?;" ;
+		var value = this.getCache(type, name) ;
+		if(value == null){
+			this.getConnection(function(err,connection){
+				if(err){
+					cb(err) ;
+				} else {
+					async.waterfall([
+						function(waterfallCb){
+							connection.query(querySelect, [name], waterfallCb) ;
+						},
+						function(result, fields, waterfallCb){
+							if(result.affectedRows === 1){
+								waterfallCb(null, [], null, parseInt(result.id)) ;
+							}else{
+								connection.query(queryInsert, [name], waterfallCb) ;
+							}
+						},
+						function(result, fields, id, waterfallCb){
+							if(!isNaN(id)){
+								waterfallCb(id) ;
+							} else {
+								waterfallCb(result.insertId) ;
+							}
+						}
+					], function(err, id){
+						if(err){
+							cb(err) ;
+						} else {
+							this.setCache(type, name, id) ;
+							cb(null, id) ;
+						}
+					}) ;
+				}
+			}) ;
+		}else{
+			cb(null, value) ;
+		}
+	} ;
 	module.exports = function(config){return new databaseManager(config)} ;
 })() ;
