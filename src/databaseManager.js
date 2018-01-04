@@ -11,6 +11,8 @@
 
 		var query_cache = {} ;
 
+		var cache = {} ;
+
 		Object.defineProperty(this, "config", {
 			enumerable: true,
 			value: config,
