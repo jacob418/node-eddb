@@ -46,6 +46,14 @@
 
 			return val ;
 		} ;
+
+		this.setCache = function setCache(name, key, value){
+			if(!cache.hasOwnProperty(name)){
+				cache[name] = {} ;
+			}
+
+			cache[name][key] = value ;
+		} ;
 	} ;
 
 	databaseManager.prototype.getConnection = function getConnection(cb, multiple) {
