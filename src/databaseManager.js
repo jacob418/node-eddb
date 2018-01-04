@@ -243,5 +243,9 @@
 			cb(null, value) ;
 		}
 	} ;
+
+	databaseManager.prototype.getSecurityId = function getSecurityId(name, cb){
+		this.getId('security', name, cb) ;
+	} ;
 	module.exports = function(config){return new databaseManager(config)} ;
 })() ;
