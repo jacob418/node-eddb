@@ -31,7 +31,7 @@
 					}
 				});
 			}
-		}
+		} ;
 	} ;
 
 	databaseManager.prototype.getConnection = function getConnection(cb, multiple) {
