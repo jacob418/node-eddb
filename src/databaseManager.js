@@ -34,6 +34,18 @@
 				});
 			}
 		} ;
+
+		this.getCache = function getCache(name, key){
+			var val = null ;
+
+			if(cache.hasOwnProperty(name)){
+				if(cache[name].hasOwnProperty(key)){
+					val = cache[name][key] ;
+				}
+			}
+
+			return val ;
+		} ;
 	} ;
 
 	databaseManager.prototype.getConnection = function getConnection(cb, multiple) {
