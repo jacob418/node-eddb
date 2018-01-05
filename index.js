@@ -19,11 +19,12 @@ const queryScheduler = require('./src/queryScheduler') ;
 			});
 			break ;
 		case "update":
-			fileManager.updateEddbJSON(function(err){
+			fileManager.updateEddbJSON(function(err, results){
 				if(err) {
 					console.log(err);
 					process.exit(1) ;
 				}else{
+					console.log(results) ;
 					process.exit(0) ;
 				}
 			}) ;
