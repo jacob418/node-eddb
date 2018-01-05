@@ -19,6 +19,10 @@
 			writable: false,
 		}) ;
 		
+		var q = async.queue(function(task, cb){
+			task(cb) ;
+		}, this.config.maxConnAmount) ;
+		
 		this.query = function query(sql ,data , cb){
 		} ;
 
