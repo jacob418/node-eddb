@@ -1,7 +1,7 @@
 const config = require('./config.json') ;
 const fileManager = require('./src/fileManager')(config.eddb) ;
 const databaseManager = require('./src/databaseManager')(config.mysql) ;
-const eddnListener = require('./src/eddnListener')({}) ;
+const eddnListener = require('./src/eddnListener') ;
 const queryScheduler = require('./src/queryScheduler') ;
 
 (function(){
@@ -30,7 +30,10 @@ const queryScheduler = require('./src/queryScheduler') ;
 			}) ;
 			break ;
 		case 'listen':
-			eddnListener.listen() ;
+			var listener = new eddnListener({}) ;
+			listener.on('starSystem', function(data){
+			}) ;
+			listener.listen() ;
 			break ;
 		default:
 			throw new Error("no valid action specified") ;
