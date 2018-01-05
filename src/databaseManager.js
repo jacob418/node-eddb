@@ -18,6 +18,9 @@
 			value: config,
 			writable: false,
 		}) ;
+		
+		this.query = function query(sql ,data , cb){
+		} ;
 
 		this.loadQuery = function loadQuery(name, cb) {
 			var fileName = path.join("./", this.config.queryDir ,name) ;
