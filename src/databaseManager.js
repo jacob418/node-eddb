@@ -20,8 +20,28 @@
 			writable: false,
 		}) ;
 		
-		var q = async.queue(function(task, cb){
-			task(cb) ;
+		var q = async.queue(function(tasks, queueCb){
+				this.getConnection(function(err, connection){
+					if(err){
+						for(var i = 0; i < tasks.length; i++){
+							tasks[i].cb(err) ;
+						}
+					} else {
+						var error = null ;
+						async.eachLimit(tasks, this.config.maxQueriesParallel,
+						function(task, eachCb){
+							task(connection,eachCb) ;
+						},
+						function(err){
+							if(err){
+								queueCb(err) ;
+							} else {
+								queueCb() ;
+							}
+						}) ;
+					}
+					
+				}) ;
 		}, this.config.maxConnAmount) ;
 		
 		this.query = function query(sql ,data , cb){
