@@ -20,6 +20,14 @@
 			writable: false,
 		}) ;
 		
+		var scheduler = new taskScheduler({maxStackSize: this.config.maxQueriesPerConn, maxWaitTime: 500}) ;
+		
+		scheduler.on('ready', function(tasks){
+			// push array contraining the task-array to prevent
+			// async from pushing every task as single task for one worker
+			q.push([tasks]) ;
+		}) ;
+		
 		var q = async.queue(function(tasks, queueCb){
 				this.getConnection(function(err, connection){
 					if(err){
