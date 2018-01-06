@@ -53,6 +53,18 @@
 		}, this.config.maxConnAmount) ;
 		
 		this.query = function query(sql ,data , cb){
+			var task = function(connection,taskCb){
+				caonnection.query(sql, data, function(err, result, fields){
+					if(err){
+						cb(err) ;
+					} else {
+						cb(null, result, fields) ;
+					}
+					// inform task-runner that the task has finished
+					taskCb() ;
+				}) ;
+			};
+			sheduler.add(task) ;
 		} ;
 
 		this.loadQuery = function loadQuery(name, cb) {
