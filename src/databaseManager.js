@@ -3,6 +3,7 @@
 	const fs = require('fs') ;
 	const mysql = require("mysql");
 	const async = require("async") ;
+	const taskScheduler = require("./src/taskScheduler") ;
 
 	var databaseManager = function databaseManager(config){
 		if(config.constructor !== {}.constructor){
