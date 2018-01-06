@@ -255,36 +255,30 @@
 		var queryInsert = "INSERT INTO " + type + " name = ?;" ;
 		var value = this.getCache(type, name) ;
 		if(value == null){
-			this.getConnection(function(err,connection){
+			async.waterfall([
+				function(waterfallCb){
+					this.query(querySelect, [name], waterfallCb) ;
+				},
+				function(result, fields, waterfallCb){
+					if(result.affectedRows === 1){
+						waterfallCb(null, [], null, parseInt(result.id)) ;
+					}else{
+						this.query(queryInsert, [name], waterfallCb) ;
+					}
+				},
+				function(result, fields, id, waterfallCb){
+					if(!isNaN(id)){
+						waterfallCb(null, id) ;
+					} else {
+						waterfallCb(null, result.insertId) ;
+					}
+				}
+			], function(err, id){
 				if(err){
 					cb(err) ;
 				} else {
-					async.waterfall([
-						function(waterfallCb){
-							connection.query(querySelect, [name], waterfallCb) ;
-						},
-						function(result, fields, waterfallCb){
-							if(result.affectedRows === 1){
-								waterfallCb(null, [], null, parseInt(result.id)) ;
-							}else{
-								connection.query(queryInsert, [name], waterfallCb) ;
-							}
-						},
-						function(result, fields, id, waterfallCb){
-							if(!isNaN(id)){
-								waterfallCb(id) ;
-							} else {
-								waterfallCb(result.insertId) ;
-							}
-						}
-					], function(err, id){
-						if(err){
-							cb(err) ;
-						} else {
-							this.setCache(type, name, id) ;
-							cb(null, id) ;
-						}
-					}) ;
+					this.setCache(type, name, id) ;
+					cb(null, id) ;
 				}
 			}) ;
 		}else{
