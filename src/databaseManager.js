@@ -125,7 +125,7 @@
 
 	} ;
 
-	databaseManager.prototype.runQuerys = function runQueries(queries, cb) {
+	databaseManager.prototype.massInsert = function massInsert(queries, cb) {
 		var results = [] ;
 
 		// start up 'this.config.maxConnAmount' connections in parallel
