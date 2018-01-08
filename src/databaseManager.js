@@ -318,5 +318,60 @@
 		this.getId('powerState', name, cb) ;
 	} ;
 
+	databaseManager.prototype.getStarSystem = function getStarSystem(name, cb){
+		var querySystem = "SELECT * FROM starSystem WHERE name = ? LIMIT 1;" ;
+		var queryFactions = "SELECT x.*, f.name AS factionName FROM starSystemHasMinorFaction x LEFT JOIN minorFaction f ON f.id = x.minorFactionId WHERE starSystemId = ?;" ;
+		this.query(querySystem, [name], function(err, resultSystem, fields){
+			if(err){
+				cb(err) ;
+			} else {
+				if(resultSystem.affectedRows === 1) {
+					var data = {} ;
+					data.id					= resultSystem.id ;
+					data.controlSysId		= resultSystem.controlSysId ;
+					data.name 				= resultSystem.name ;
+					data.rulimgFaction 		= resultSystem.controllingMinorFactionId ;
+					data.updatedAt		 	= resultSystem.updatedAt ;
+					data.security		 	= resultSystem.securityId ;
+					data.state			 	= resultSystem.powerStateId ;
+					data.economy		 	= resultSystem.economyId ;
+					data.x				 	= resultSystem.x ;
+					data.y				 	= resultSystem.y ;
+					data.z				 	= resultSystem.z ;
+					data.population		 	= resultSystem.population ;
+					data.factions			= [] ;
+
+					this.query(queryFactions, [resultSystem.id], function(err, resultFaction, fields){
+						if(err) {
+							cb(err) ;
+						} else {
+							if(!Array.isArray(resultFaction)){
+								resultFaction = [resultFaction] ;
+							}
+							
+							var factionData = {};
+							for (var i = 0; i < resultFaction.length; i++) {
+								factionData = {};
+								factionData.name = resultFaction[i].name ;
+								factionData.minorFactionId = resultFaction[i].minorFactionId ;
+								factionData.influence = resultFaction[i].influence ;
+								factionData.stateId = resultFaction[i].stateId ;
+								factionData.recoveringStateId = resultFaction[i].recoveringStateId ;
+								factionData.pendingStateId = resultFaction[i].pendingStateId ;
+
+								data.factions.push(factionData) ;
+							}
+
+							cb(null, data) ;
+						}
+					}) ;
+					cb(null, data);
+				} else {
+					cb(null, {}) ;
+				}
+			}
+		}) ;
+	} ;
+
 	module.exports = function(config){return new databaseManager(config)} ;
 })() ;
