@@ -365,7 +365,6 @@
 							cb(null, data) ;
 						}
 					}) ;
-					cb(null, data);
 				} else {
 					cb(null, {}) ;
 				}
