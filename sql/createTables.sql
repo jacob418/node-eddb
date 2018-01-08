@@ -12,7 +12,7 @@ CREATE TABLE starSystem (
 	powerStateId 				INT(8)		UNSIGNED	NULL ,
 	updatedAt 					INT(11)		UNSIGNED	NOT NULL ,
 	controllingMinorFactionId	INT(11)		UNSIGNED	NOT NULL ,
-	KEY(name)
+	UNIQUE INDEX(name)
 ) ;
 
 CREATE TABLE minorFaction (
@@ -20,7 +20,7 @@ CREATE TABLE minorFaction (
 	name						VARCHAR(50)				NOT NULL ,
 	governmentId				INT(8)		UNSIGNED	NOT NULL ,
 	allegianceId				INT(8)		UNSIGNED	NOT NULL ,
-	KEY(name)
+	UNIQUE INDEX(name)
 ) ;
 
 CREATE TABLE security (
