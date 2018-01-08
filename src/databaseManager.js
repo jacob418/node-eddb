@@ -348,7 +348,7 @@
 							if(!Array.isArray(resultFaction)){
 								resultFaction = [resultFaction] ;
 							}
-							
+
 							var factionData = {};
 							for (var i = 0; i < resultFaction.length; i++) {
 								factionData = {};
