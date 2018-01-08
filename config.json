@@ -6,7 +6,9 @@
 		"db": "jacobf_eddb",
 		"queryDir": "sql",
 		"maxConnDuration": 10000,
-		"maxConnAmount": 5
+		"maxConnAmount": 3,
+		"maxQueriesParallel": 5,
+		"maxQueriesPerConn": 20
 	},
 	"scheduler":{
 		"maxStackSize": 50,

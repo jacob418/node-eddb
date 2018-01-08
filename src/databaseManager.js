@@ -3,6 +3,7 @@
 	const fs = require('fs') ;
 	const mysql = require("mysql");
 	const async = require("async") ;
+	const taskScheduler = require("./src/taskScheduler") ;
 
 	var databaseManager = function databaseManager(config){
 		if(config.constructor !== {}.constructor){
@@ -19,11 +20,51 @@
 			writable: false,
 		}) ;
 		
-		var q = async.queue(function(task, cb){
-			task(cb) ;
+		var scheduler = new taskScheduler({maxStackSize: this.config.maxQueriesPerConn, maxWaitTime: 500}) ;
+		
+		scheduler.on('ready', function(tasks){
+			// push array contraining the task-array to prevent
+			// async from pushing every task as single task for one worker
+			q.push([tasks]) ;
+		}) ;
+		
+		var q = async.queue(function(tasks, queueCb){
+				this.getConnection(function(err, connection){
+					if(err){
+						for(var i = 0; i < tasks.length; i++){
+							tasks[i].cb(err) ;
+						}
+					} else {
+						var error = null ;
+						async.eachLimit(tasks, this.config.maxQueriesParallel,
+						function(task, eachCb){
+							task(connection,eachCb) ;
+						},
+						function(err){
+							if(err){
+								queueCb(err) ;
+							} else {
+								queueCb() ;
+							}
+						}) ;
+					}
+					
+				}) ;
 		}, this.config.maxConnAmount) ;
 		
 		this.query = function query(sql ,data , cb){
+			var task = function(connection,taskCb){
+				caonnection.query(sql, data, function(err, result, fields){
+					if(err){
+						cb(err) ;
+					} else {
+						cb(null, result, fields) ;
+					}
+					// inform task-runner that the task has finished
+					taskCb() ;
+				}) ;
+			};
+			sheduler.add(task) ;
 		} ;
 
 		this.loadQuery = function loadQuery(name, cb) {
@@ -84,7 +125,7 @@
 
 	} ;
 
-	databaseManager.prototype.runQuerys = function runQueries(queries, cb) {
+	databaseManager.prototype.massInsert = function massInsert(queries, cb) {
 		var results = [] ;
 
 		// start up 'this.config.maxConnAmount' connections in parallel
@@ -214,36 +255,30 @@
 		var queryInsert = "INSERT INTO " + type + " name = ?;" ;
 		var value = this.getCache(type, name) ;
 		if(value == null){
-			this.getConnection(function(err,connection){
+			async.waterfall([
+				function(waterfallCb){
+					this.query(querySelect, [name], waterfallCb) ;
+				},
+				function(result, fields, waterfallCb){
+					if(result.affectedRows === 1){
+						waterfallCb(null, [], null, parseInt(result.id)) ;
+					}else{
+						this.query(queryInsert, [name], waterfallCb) ;
+					}
+				},
+				function(result, fields, id, waterfallCb){
+					if(!isNaN(id)){
+						waterfallCb(null, id) ;
+					} else {
+						waterfallCb(null, result.insertId) ;
+					}
+				}
+			], function(err, id){
 				if(err){
 					cb(err) ;
 				} else {
-					async.waterfall([
-						function(waterfallCb){
-							connection.query(querySelect, [name], waterfallCb) ;
-						},
-						function(result, fields, waterfallCb){
-							if(result.affectedRows === 1){
-								waterfallCb(null, [], null, parseInt(result.id)) ;
-							}else{
-								connection.query(queryInsert, [name], waterfallCb) ;
-							}
-						},
-						function(result, fields, id, waterfallCb){
-							if(!isNaN(id)){
-								waterfallCb(id) ;
-							} else {
-								waterfallCb(result.insertId) ;
-							}
-						}
-					], function(err, id){
-						if(err){
-							cb(err) ;
-						} else {
-							this.setCache(type, name, id) ;
-							cb(null, id) ;
-						}
-					}) ;
+					this.setCache(type, name, id) ;
+					cb(null, id) ;
 				}
 			}) ;
 		}else{
