@@ -62,7 +62,7 @@ CREATE TABLE starSystemHasMinorFaction(
 	id					INT(11)		UNSIGNED	NOT NULL	AUTO_INCREMENT	PRIMARY KEY ,
 	minorFactionId		INT(11)		UNSIGNED	NOT NULL ,
 	starSystemId		INT(11)		UNSIGNED	NOT NULL ,
-	factionStateId		INT(8)		UNSIGNED	NOT NULL ,
+	stateId				INT(8)		UNSIGNED	NOT NULL ,
 	pendingStateId		INT(8)		UNSIGNED	NULL ,
 	recoveringStateId	INT(8)		UNSIGNED	NULL ,
 	influence			FLOAT(7,4)	UNSIGNED	NOT NULL ,
