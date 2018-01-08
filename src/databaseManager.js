@@ -254,5 +254,34 @@
 	databaseManager.prototype.getSecurityId = function getSecurityId(name, cb){
 		this.getId('security', name, cb) ;
 	} ;
+
+	databaseManager.prototype.getGovernmentId = function getGovernmentId(name, cb){
+		this.getId('goverment', name, cb) ;
+	} ;
+
+	databaseManager.prototype.getAllegianceId = function getAllegianceId(name, cb){
+		this.getId('allegiance', name, cb) ;
+	} ;
+
+	databaseManager.prototype.getPowerId = function getPowerId(name, cb){
+		this.getId('power', name, cb) ;
+	} ;
+
+	databaseManager.prototype.getFactionId = function getFactionId(name, cb){
+		this.getId('minorFaction', name, cb) ;
+	} ;
+
+	databaseManager.prototype.getEconomyId = function getEconomyId(name, cb){
+		this.getId('economy', name, cb) ;
+	} ;
+
+	databaseManager.prototype.getFactionStateId = function getFactionStateId(name, cb){
+		this.getId('factionState', name, cb) ;
+	} ;
+
+	databaseManager.prototype.getPowerStateId = function getPowerStateId(name, cb){
+		this.getId('powerState', name, cb) ;
+	} ;
+
 	module.exports = function(config){return new databaseManager(config)} ;
 })() ;
