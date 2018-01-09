@@ -302,8 +302,40 @@
 		this.getId('power', name, cb) ;
 	} ;
 
-	databaseManager.prototype.getFactionId = function getFactionId(name, cb){
-		this.getId('minorFaction', name, cb) ;
+	databaseManager.prototype.getFactionId = function getFactionId(name, govId, allegId, cb){
+		var querySelect = "SELECT * FROM minorFaction WHERE name = ? LIMIT 1;" ;
+		var queryInsert = "INSERT INTO minorFaction name = ?, governmentId = ?, allegianceId = ?;" ;
+		var value = this.getCache("minorFaction", name) ;
+		if(value == null){
+			async.waterfall([
+				function(waterfallCb){
+					this.query(querySelect, [name], waterfallCb) ;
+				},
+				function(result, fields, waterfallCb){
+					if(result.affectedRows === 1){
+						waterfallCb(null, [], null, parseInt(result.id)) ;
+					}else{
+						this.query(queryInsert, [name, govId, allegId], waterfallCb) ;
+					}
+				},
+				function(result, fields, id, waterfallCb){
+					if(!isNaN(id)){
+						waterfallCb(null, id) ;
+					} else {
+						waterfallCb(null, result.insertId) ;
+					}
+				}
+			], function(err, id){
+				if(err){
+					cb(err) ;
+				} else {
+					this.setCache("minorFaction", name, id) ;
+					cb(null, id) ;
+				}
+			}) ;
+		}else{
+			cb(null, value) ;
+		}
 	} ;
 
 	databaseManager.prototype.getEconomyId = function getEconomyId(name, cb){
