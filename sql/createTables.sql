@@ -12,7 +12,7 @@ CREATE TABLE starSystem (
 	powerId						INT(8)		UNSIGNED	NULL ,
 	powerStateId 				INT(8)		UNSIGNED	NULL ,
 	updatedAt 					INT(11)		UNSIGNED	NOT NULL ,
-	controllingMinorFactionId	INT(11)		UNSIGNED	NOT NULL ,
+	rulingMinorFactionId		INT(11)		UNSIGNED	NOT NULL ,
 	UNIQUE INDEX(name)
 ) ;
 
