@@ -35,6 +35,11 @@ const queryScheduler = require('./src/queryScheduler') ;
 				console.log("Recived Starsystem: '" + data.name + "' ...") ;
 				databaseManager.updateStarSystem(data, function(err, data){
 					if(err) {
+						console.log("#####################") ;
+						console.log(err.sql);
+						console.log(err.sqlMessage);
+						console.log("ERR: " + err.code);
+						console.log("#####################") ;
 					} else {
 						console.log("Saved Starsystem: '" + data.name + "' ...");
 					}
