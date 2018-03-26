@@ -28,7 +28,6 @@
 			// push array contraining the task-array to prevent
 			// async from pushing every task as single task for one worker
 			q.push([tasks]) ;
-			console.log("size: " + q.length()) ;
 		}) ;
 		
 		var q = async.queue(function(tasks, queueCb){
