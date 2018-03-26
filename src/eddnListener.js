@@ -49,6 +49,8 @@
 							data.y				 	= content.StarPos[1] || null ;
 							data.z				 	= content.StarPos[2] || null ;
 							data.population		 	= content.Population || null ;
+							data.power		 		= (Array.isArray(content.Powers) ? content.Powers[0] : null) ;
+							data.powerState	 		= content.PowerplayState || null ;
 							data.factions = [] ;
 							var factionData = {} ;
 							if(Array.isArray(content.Factions)) {
