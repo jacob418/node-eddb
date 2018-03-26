@@ -1,12 +1,12 @@
 ALTER TABLE starSystem
-	DROP KEY controllingFaction ,
+	DROP KEY rulingFaction ,
 	DROP KEY powerState ,
 	DROP KEY power ,
 	DROP KEY economy ,
-	DROP KEY minorFaction ;
+	DROP KEY security_ ;
 
 ALTER TABLE minorFaction
-	DROP KEY goverment ,
+	DROP KEY government ,
 	DROP KEY allegiance ;
 
 ALTER TABLE starSystemHasMinorFaction
