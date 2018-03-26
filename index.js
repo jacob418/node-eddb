@@ -5,7 +5,7 @@ const eddnListener = require('./src/eddnListener') ;
 const queryScheduler = require('./src/queryScheduler') ;
 
 (function(){
-	const action = (typeof process.argv[2] === "string" ? process.argv[2] : "") ;
+	const action = (typeof process.argv[2] === "string" ? process.argv[2] : "listen") ;
 
 	switch(action) {
 		case "init-db":
