@@ -32,6 +32,7 @@ const queryScheduler = require('./src/queryScheduler') ;
 		case 'listen':
 			var listener = new eddnListener({}) ;
 			listener.on('starSystem', function(data){
+				console.log("Recived Starsystem: '" + data.name + "' ...") ;
 			}) ;
 			listener.listen() ;
 			break ;
