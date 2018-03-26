@@ -14,6 +14,8 @@
 			writable: false,
 		}) ;
 
+		var listeners = {ready:[], error: []} ;
+
 		var stack = [] ;
 		
 		var emptyTimeout = null ;
@@ -25,52 +27,6 @@
 			checkStackSize() ;
 
 			return stack.length ;
-		} ;
-
-		var checkStackSize = function checkStackSize(){
-			var size = stack.length ;
-			
-			if(emptyTimeout !== null){
-				clearTimeout(emptyTimeout) ;
-				emptyTimeout = null ;
-			}
-			
-			if(stack.length >= config.maxStackSize){
-				evtReady() ;
-				if(stack.length > config.maxStackSize){
-					setTimeout(checkStackSize,100) ;
-				} else if(stack.length > 0) {
-					emptyTimeout = setTimeout(this.readyNow, config.maxWaitTime) ;
-				}
-			} else if(stack.length > 0) {
-				emptyTimeout = setTimeout(this.readyNow, config.maxWaitTime) ;
-			}
-		} ;
-
-		var evtError = function evtError(strError) {
-			if(listeners.error.length > 0) {
-				for (var i = 0; i < listeners.error.length; i++) {
-					listeners.error[i](new Error(strError));
-				}
-			} else {
-				throw new Error(strError) ;
-			}
-		} ;
-
-		var evtReady = function evtReady() {
-			if(listeners.ready.length > 0) {
-				var stagedTasks = [] ;
-			
-				while(stack.length > 0 && stagedTasks.length < config.maxStackSize) {
-					stagedTasks.push(stack.pop());
-				}
-
-				for (var i = 0; i < listeners.ready.length; i++) {
-					listeners.ready[i](stagedTasks);
-				}
-			} else {
-				evtError("missing ready function") ;
-			}
 		} ;
 
 		this.readyNow = function(){
@@ -97,6 +53,52 @@
 					break ;
 				default:
 					throw new Error("unknown event '" + strEvt + "'") ;
+			}
+		} ;
+
+		var checkStackSize = function checkStackSize(){
+			var size = stack.length ;
+			
+			if(emptyTimeout !== null){
+				clearTimeout(emptyTimeout) ;
+				emptyTimeout = null ;
+			}
+			
+			if(stack.length >= config.maxStackSize){
+				evtReady() ;
+				if(stack.length > config.maxStackSize){
+					setTimeout(checkStackSize.bind(this),100) ;
+				} else if(stack.length > 0) {
+					emptyTimeout = setTimeout(evtReady, config.maxWaitTime) ;
+				}
+			} else if(stack.length > 0) {
+				emptyTimeout = setTimeout(evtReady, config.maxWaitTime) ;
+			}
+		} ;
+
+		var evtError = function evtError(strError) {
+			if(listeners.error.length > 0) {
+				for (var i = 0; i < listeners.error.length; i++) {
+					listeners.error[i](new Error(strError));
+				}
+			} else {
+				throw new Error(strError) ;
+			}
+		} ;
+
+		var evtReady = function evtReady() {
+			if(listeners.ready.length > 0) {
+				var stagedTasks = [] ;
+			
+				while(stack.length > 0 && stagedTasks.length < config.maxStackSize) {
+					stagedTasks.push(stack.pop());
+				}
+
+				for (var i = 0; i < listeners.ready.length; i++) {
+					listeners.ready[i](stagedTasks);
+				}
+			} else {
+				evtError("missing ready function") ;
 			}
 		} ;
 	};
