@@ -3,7 +3,7 @@
 	const fs = require('fs') ;
 	const mysql = require("mysql");
 	const async = require("async") ;
-	const taskScheduler = require("./src/taskScheduler") ;
+	const taskScheduler = require("./taskScheduler") ;
 
 	var databaseManager = function databaseManager(config){
 		if(config.constructor !== {}.constructor){
@@ -20,27 +20,32 @@
 			writable: false,
 		}) ;
 		
-		var scheduler = new taskScheduler({maxStackSize: this.config.maxQueriesPerConn, maxWaitTime: 500}) ;
+		var scheduler = new taskScheduler({
+			maxStackSize: config.maxQueriesPerConn,
+			maxWaitTime: 500}) ;
 		
 		scheduler.on('ready', function(tasks){
 			// push array contraining the task-array to prevent
 			// async from pushing every task as single task for one worker
 			q.push([tasks]) ;
+			console.log("size: " + q.length()) ;
 		}) ;
 		
 		var q = async.queue(function(tasks, queueCb){
 				this.getConnection(function(err, connection){
 					if(err){
 						for(var i = 0; i < tasks.length; i++){
-							tasks[i].cb(err) ;
+							scheduler.add(tasks[i]) ;
 						}
+						queueCb(err) ;
 					} else {
 						var error = null ;
-						async.eachLimit(tasks, this.config.maxQueriesParallel,
+						async.eachLimit(tasks, config.maxQueriesParallel,
 						function(task, eachCb){
 							task(connection,eachCb) ;
 						},
 						function(err){
+							// need to close conn...
 							if(err){
 								queueCb(err) ;
 							} else {
@@ -50,11 +55,15 @@
 					}
 					
 				}) ;
-		}, this.config.maxConnAmount) ;
+		}.bind(this), config.maxConnAmount) ;
 		
-		this.query = function query(sql ,data , cb){
+		this.query = function query(sql, data, cb){
+			if(!Array.isArray(data)){
+				data = [] ;
+			}
+
 			var task = function(connection,taskCb){
-				caonnection.query(sql, data, function(err, result, fields){
+				connection.query(sql, data, function(err, result, fields){
 					if(err){
 						cb(err) ;
 					} else {
@@ -64,11 +73,11 @@
 					taskCb() ;
 				}) ;
 			};
-			sheduler.add(task) ;
+			scheduler.add(task) ;
 		} ;
 
 		this.loadQuery = function loadQuery(name, cb) {
-			var fileName = path.join("./", this.config.queryDir ,name) ;
+			var fileName = path.join("./", config.queryDir ,name) + ".sql" ;
 			if(typeof query_cache[fileName] === "string") {
 				cb(null, query_cache[fileName]);
 			}else{
@@ -211,7 +220,7 @@
 	} ;
 
 	databaseManager.prototype.prepareQuery = function prepareQuery(name, data, cb){
-		var queryFileName = name + '.sql' ;
+		var queryFileName = name ;
 		this.loadQuery(queryFileName,function(err, strQuery){
 			if(err){
 				cb(err) ;
@@ -229,10 +238,12 @@
 			} else {
 				this.getConnection(function(err, connection){
 					if(err){
-						connection.end() ;
+						//connection.end() ;
 						cb(err) ;
 					} else {
-						async.mapSeries(queries, connection.query, function (err, results) {
+						async.mapSeries(queries, function(query, mapSeriesCb){
+							connection.query(query, [], mapSeriesCb) ;
+						}, function (err, results) {
 							if (err) {
 								cb(err);
 							} else {
@@ -243,46 +254,74 @@
 								cb(err, retResults);
 							}
 							connection.end() ;
-						}) ;
+						}.bind(this)) ;
 					}
-				});
+				}.bind(this), true);
 			}
 		}.bind(this));
 	} ;
 
 	databaseManager.prototype.getId = function getId(type ,name, cb){
-		var querySelect = "SELECT * FROM " + type + " WHERE name = ? LIMIT 1;" ;
-		var queryInsert = "INSERT INTO " + type + " name = ?;" ;
-		var value = this.getCache(type, name) ;
-		if(value == null){
-			async.waterfall([
-				function(waterfallCb){
-					this.query(querySelect, [name], waterfallCb) ;
-				},
-				function(result, fields, waterfallCb){
-					if(result.affectedRows === 1){
-						waterfallCb(null, [], null, parseInt(result.id)) ;
-					}else{
-						this.query(queryInsert, [name], waterfallCb) ;
-					}
-				},
-				function(result, fields, id, waterfallCb){
-					if(!isNaN(id)){
-						waterfallCb(null, id) ;
+		if(name === undefined)
+			throw new Error() ;
+		if(name === null){
+			cb(null, null) ;
+		} else {
+			var querySelect = "SELECT * FROM " + type + " WHERE name = ? LIMIT 1;";
+			var queryInsert = "INSERT INTO " + type + " SET name = ?;";
+			var value = this.getCache(type, name);
+			if (value === null) {
+				this.setCache(type, name, 0);
+				async.waterfall([
+					function (waterfallCb) {
+						this.query(querySelect, [name], function(err, result){
+							waterfallCb(err, result);
+						});
+					}.bind(this),
+					function (result, waterfallCb) {
+						if (result.length === 1) {
+							waterfallCb(null, [], parseInt(result[0].id));
+						} else {
+							this.query(queryInsert, [name], function(err, result){
+								waterfallCb(err, result, NaN);
+							});
+						}
+					}.bind(this),
+					function (result, id, waterfallCb) {
+						if (!isNaN(id)) {
+							waterfallCb(null, id);
+						} else {
+							waterfallCb(null, result.insertId);
+						}
+					}.bind(this)
+				], function (err, id) {
+					if (err) {
+						cb(err);
 					} else {
-						waterfallCb(null, result.insertId) ;
+						this.setCache(type, name, id);
+						cb(null, id);
 					}
-				}
-			], function(err, id){
-				if(err){
-					cb(err) ;
-				} else {
-					this.setCache(type, name, id) ;
-					cb(null, id) ;
-				}
-			}) ;
-		}else{
-			cb(null, value) ;
+				}.bind(this));
+			}else if(value === 0){
+				var retryCnt = 0 ;
+				async.whilst(
+					function() { return this.getCache(type, name) === 0 ; }.bind(this),
+					function(callback) {
+						retryCnt++ ;
+						if(retryCnt > 500){
+							callback(new Error('max retry count reached'));
+						} else {
+							setTimeout(function () {
+								callback(null);
+							}, 250);
+						}
+					},
+					function (err) {
+						cb(err, this.getCache(type, name))
+					}.bind(this));
+			} else {
+				cb(null, value);
+			}
 		}
 	} ;
 
@@ -291,7 +330,7 @@
 	} ;
 
 	databaseManager.prototype.getGovernmentId = function getGovernmentId(name, cb){
-		this.getId('goverment', name, cb) ;
+		this.getId('government', name, cb) ;
 	} ;
 
 	databaseManager.prototype.getAllegianceId = function getAllegianceId(name, cb){
@@ -304,21 +343,26 @@
 
 	databaseManager.prototype.getFactionId = function getFactionId(name, govId, allegId, cb){
 		var querySelect = "SELECT * FROM minorFaction WHERE name = ? LIMIT 1;" ;
-		var queryInsert = "INSERT INTO minorFaction name = ?, governmentId = ?, allegianceId = ?;" ;
+		var queryInsert = "INSERT INTO minorFaction SET name = ?, governmentId = ?, allegianceId = ?;" ;
 		var value = this.getCache("minorFaction", name) ;
 		if(value == null){
+			this.setCache("minorFaction", name, 0) ;
 			async.waterfall([
 				function(waterfallCb){
-					this.query(querySelect, [name], waterfallCb) ;
-				},
-				function(result, fields, waterfallCb){
-					if(result.affectedRows === 1){
-						waterfallCb(null, [], null, parseInt(result.id)) ;
+					this.query(querySelect, [name], function(err, result){
+						waterfallCb(err, result) ;
+					}) ;
+				}.bind(this),
+				function(result, waterfallCb){
+					if(result.length === 1){
+						waterfallCb(null, [], parseInt(result[0].id)) ;
 					}else{
-						this.query(queryInsert, [name, govId, allegId], waterfallCb) ;
+						this.query(queryInsert, [name, govId, allegId], function(err, result){
+							waterfallCb(err, result, NaN) ;
+						}) ;
 					}
-				},
-				function(result, fields, id, waterfallCb){
+				}.bind(this),
+				function(result, id, waterfallCb){
 					if(!isNaN(id)){
 						waterfallCb(null, id) ;
 					} else {
@@ -332,7 +376,24 @@
 					this.setCache("minorFaction", name, id) ;
 					cb(null, id) ;
 				}
-			}) ;
+			}.bind(this)) ;
+		}else if(value === 0){
+			var retryCnt = 0 ;
+			async.whilst(
+				function() { return this.getCache("minorFaction", name) === 0 ; }.bind(this),
+				function(callback) {
+					retryCnt++ ;
+					if(retryCnt > 500){
+						callback(new Error('max retry count reached'));
+					} else {
+						setTimeout(function () {
+							callback(null);
+						}, 250);
+					}
+				},
+				function (err) {
+					cb(err, this.getCache("minorFaction", name)) ;
+				}.bind(this));
 		}else{
 			cb(null, value) ;
 		}
@@ -357,12 +418,13 @@
 			if(err){
 				cb(err) ;
 			} else {
-				if(resultSystem.affectedRows === 1) {
+				if(resultSystem.length === 1) {
+					resultSystem = resultSystem[0] ;
 					var data = {} ;
 					data.id					= resultSystem.id ;
 					data.controlSysId		= resultSystem.controlSysId ;
 					data.name 				= resultSystem.name ;
-					data.rulimgFaction 		= resultSystem.controllingMinorFactionId ;
+					data.rulingFactionId	= resultSystem.rulingMinorFactionId ;
 					data.updatedAt		 	= resultSystem.updatedAt ;
 					data.security		 	= resultSystem.securityId ;
 					data.state			 	= resultSystem.powerStateId ;
@@ -377,10 +439,11 @@
 						if(err) {
 							cb(err) ;
 						} else {
+
 							if(!Array.isArray(resultFaction)){
 								resultFaction = [resultFaction] ;
-							}
 
+							}
 							var factionData = {};
 							for (var i = 0; i < resultFaction.length; i++) {
 								factionData = {};
@@ -401,8 +464,254 @@
 					cb(null, {}) ;
 				}
 			}
+		}.bind(this)) ;
+	} ;
+
+
+	databaseManager.prototype.updateStarSystem = function updateStarSystem(data, cb) {
+		this.getStarSystem(data.name, function(err, system){
+			if(err){
+				cb(err) ;
+			} else {
+				system.name = data.name;
+				system.x = data.x;
+				system.y = data.y;
+				system.z = data.z;
+				system.population = data.population;
+				system.state = data.state;
+				system.power = data.power;
+				system.economy = data.economy;
+				system.security = data.security;
+				system.updatedAt = data.updatedAt;
+				system.rulingFaction = data.rulingFaction;
+
+				if (!Array.isArray(system.factions)) {
+					system.factions = [];
+				}
+
+
+				for (var i = 0; i < data.factions.length; i++) {
+					var found = system.factions.findIndex(function (el) {
+						return el.name === data.factions[i].name;
+					});
+
+					if (found > -1) {
+						system.factions[found] = data.factions[i];
+					} else {
+						system.factions.push(data.factions[i]);
+					}
+				}
+
+				// delete factions that are not present anymore
+				for (var i = 0; i < system.factions.length; i++) {
+					var found = data.factions.find(function (el) {
+						return el.name === system.factions[i].name;
+					});
+					if (!found) {
+
+						system.factions.splice(i, 1);
+						i--;	// reduce index by 1 to avoid unintended skipping of elements
+					}
+				}
+
+				// remove 'Pilots Federation Local Branch' since it has no influence
+				for(var a = 0; a < system.factions.length; a++) {
+					if(system.factions[a].influence === null) {
+						system.factions.splice(a, 1);
+						a--;	// reduce index by 1 to avoid unintended skipping of elements
+					}
+				}
+
+				async.parallel({
+					powerStateId: function (parallelCb) {
+						this.getPowerStateId(system.state, parallelCb);
+					}.bind(this),
+					economyId: function (parallelCb) {
+						this.getEconomyId(system.economy, parallelCb);
+					}.bind(this),
+					securityId: function (parallelCb) {
+						this.getSecurityId(system.security, parallelCb);
+					}.bind(this),
+					powerId: function (parallelCb) {
+						this.getPowerId(system.power, parallelCb);
+					}.bind(this)
+				}, function (err, results) {
+					if (err) {
+						cb(err);
+					} else {
+						system.securityId = results.securityId;
+						system.economyId = results.economyId;
+						system.powerId = results.powerId;
+						system.powerStateId = results.powerStateId;
+
+
+						async.eachOf(system.factions, function (faction, key, eachOfCb) {
+							async.parallel({
+								allegianceId: function (parallelCb) {
+									this.getAllegianceId(faction.allegiance, parallelCb);
+								}.bind(this),
+								govermentId: function (parallelCb) {
+									this.getGovernmentId(faction.goverment, parallelCb);
+								}.bind(this),
+								stateId: function (parallelCb) {
+									this.getFactionStateId(faction.state, parallelCb);
+								}.bind(this),
+								recoveringStateId: function (parallelCb) {
+									this.getFactionStateId(faction.recoveringState, parallelCb);
+								}.bind(this),
+								pendingStateId: function (parallelCb) {
+									this.getFactionStateId(faction.pendingState, parallelCb);
+								}.bind(this)
+							}, function (err, results) {
+								if (err) {
+									eachOfCb(err);
+								} else {
+									this.getFactionId(faction.name,
+										results.govermentId,
+										results.allegianceId,
+										function (err, id) {
+											if (err) {
+												eachOfCb(err);
+											} else {
+												system.factions[key].factionId = id;
+												system.factions[key].govermentId = results.govermentId;
+												system.factions[key].allegianceId = results.allegianceId;
+												system.factions[key].stateId = results.stateId;
+												system.factions[key].recoveringStateId = results.recoveringStateId;
+												system.factions[key].pendingStateId = results.pendingStateId;
+
+
+												if (system.rulingFaction === faction.name) {
+													system.rulingFactionId = id;
+												}
+
+												eachOfCb(null);
+											}
+										});
+								}
+							}.bind(this));
+						}.bind(this), function (err) {
+							if (err) {
+								cb(err);
+							} else {
+								this.saveStarSystem(system, cb);
+							}
+						}.bind(this));
+					}
+				}.bind(this));
+			}
+		}.bind(this)) ;
+	} ;
+
+	databaseManager.prototype.saveStarSystem = function saveStarSystem(data, cb) {
+		async.waterfall([
+			function(waterfallCb){
+				var queryFile = 'starSystemUpdate' ;
+				var queryData = [
+					data.population,
+					data.securityId,
+					data.economyId,
+					data.powerId,
+					data.powerStateId,
+					data.updatedAt,
+					data.rulingFactionId,
+					data.id
+				] ;
+				if(isNaN(parseInt(data.id))) {
+					queryFile = 'starSystemInsert' ;
+					queryData = [
+						data.name,
+						data.x, data.y, data.z,
+						data.population,
+						data.securityId,
+						data.economyId,
+						data.powerId,
+						data.powerStateId,
+						data.updatedAt,
+						data.rulingFactionId
+					] ;
+				}
+
+				this.loadQuery(queryFile, function(err, sql) {
+					if (err) {
+						waterfallCb(err);
+					} else {
+						this.query(sql, queryData, function (err, result, fields) {
+							if (err) {
+								waterfallCb(err);
+							} else {
+								if(isNaN(parseInt(data.id))) {
+									data.id = result.insertId;
+								}
+
+								waterfallCb(null, data) ;
+							}
+						});
+					}
+				}.bind(this)) ;
+			}.bind(this),
+			function(data, waterfallCb){
+				async.eachOf(data.factions, function(faction, key, eachCb){
+					this.loadQuery('starSystemFactionInsertUpdate', function(err, sql) {
+						if(err){
+							eachCb(err) ;
+						} else {
+							this.query(sql,
+									  [
+									  	  faction.factionId,
+										  data.id,
+										  faction.stateId,
+										  faction.pendingStateId,
+										  faction.recoveringStateId,
+										  faction.influence,
+										  faction.stateId,
+										  faction.pendingStateId,
+										  faction.recoveringStateId,
+										  faction.influence
+									  ],
+									  function (err, result, fields) {
+								if (err) {
+									eachCb(err);
+								} else {
+									data.factions[key].id = result.insertId ;
+									eachCb(null) ;
+								}
+							});
+						}
+					}.bind(this)) ;
+				}.bind(this), function(err){
+					if(err){
+						waterfallCb(err) ;
+					} else {
+						waterfallCb(null, data) ;
+					}
+				}) ;
+			}.bind(this),
+			function(data, waterfallCb){
+				var knownFactions = [] ;
+				for(var i = 0; i < data.factions.length; i++){
+					knownFactions.push(data.factions.id) ;
+				}
+
+				this.query('DELETE FROM starSystemHasMinorFaction WHERE minorFactionId NOT IN (?) AND starSystemId = ?',
+						   [knownFactions, data.id],
+						   function(err, result, fields){
+					if(err){
+						waterfallCb(err) ;
+					} else {
+						waterfallCb(null, data) ;
+					}
+				}) ;
+			}.bind(this)
+		],function(err, data){
+			if(err){
+				cb(err) ;
+			} else {
+				cb(null, data) ;
+			}
 		}) ;
 	} ;
+
 
 	module.exports = function(config){return new databaseManager(config)} ;
 })() ;
