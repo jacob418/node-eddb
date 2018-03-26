@@ -40,7 +40,7 @@
 
 							var data = {} ;
 							data.name 				= content.StarSystem || "" ;
-							data.rulimgFraction 	= content.SystemFaction || null ;
+							data.rulingFaction 		= content.SystemFaction || null ;
 							data.updatedAt		 	= parseInt(Date.parse(content.timestamp)/1000) ;
 							data.security		 	= content.SystemSecurity || null ;
 							data.state			 	= content.PowerplayState || "None" ;
