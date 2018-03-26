@@ -1,6 +1,7 @@
 CREATE TABLE starSystem (
 	id							INT(11)		UNSIGNED	NOT NULL	PRIMARY KEY  AUTO_INCREMENT,
 	controlSysId				INT(11)		UNSIGNED	NULL ,
+	eddbId						INT(11)		UNSIGNED	NULL ,
 	name 						VARCHAR(50)				NOT NULL ,
 	x 							FLOAT(11,5)				NOT NULL ,
 	y 							FLOAT(11,5)				NOT NULL ,
