@@ -61,24 +61,36 @@
 									factionData.goverment			= content.Factions[i].Government || null ;
 									factionData.influence			= content.Factions[i].Influence || null ;
 									factionData.state				= content.Factions[i].FactionState || null ;
+									factionData.recoveringState		= "None" ; // default value
 									factionData.recoveringStates	= [] ;
 									if (Array.isArray(content.Factions[i].RecoveringStates)) {
 										var recoveringState = {};
+										var maxTrend = -2 ;
+
 										for (var j = 0; j < content.Factions[i].RecoveringStates.length; j++) {
 											recoveringState = {};
 											recoveringState.trend = content.Factions[i].RecoveringStates[j].Trend;
 											recoveringState.state = content.Factions[i].RecoveringStates[j].State;
 											factionData.recoveringStates.push(recoveringState);
+											if(maxTrend < content.Factions[i].RecoveringStates[j].Trend){
+												factionData.recoveringState = content.Factions[i].RecoveringStates[j].State ;
+											}
 										}
 									}
+									factionData.pendingState		= "None" ; // default value
 									factionData.pendingStates 		= [];
 									if (Array.isArray(content.Factions[i].PendingStates)) {
 										var pendingState = {};
+										var maxTrend = -2 ;
+
 										for (var k = 0; k < content.Factions[i].PendingStates.length; k++) {
 											pendingState = {};
 											pendingState.trend = content.Factions[i].PendingStates[k].Trend;
 											pendingState.state = content.Factions[i].PendingStates[k].State;
 											factionData.pendingStates.push(pendingState);
+											if(maxTrend < content.Factions[i].PendingStates[k].Trend){
+												factionData.pendingState = content.Factions[i].PendingStates[k].State ;
+											}
 										}
 									}
 									data.factions.push(factionData);
