@@ -9,7 +9,7 @@ CREATE TABLE starSystem (
 	population 					INT(10)		UNSIGNED	NOT NULL ,
 	securityId 					INT(8)		UNSIGNED	NOT NULL ,
 	economyId 					INT(8)		UNSIGNED	NOT NULL ,
-	powerId						INT(8)					NULL ,
+	powerId						INT(8)		UNSIGNED	NULL ,
 	powerStateId 				INT(8)		UNSIGNED	NULL ,
 	updatedAt 					INT(11)		UNSIGNED	NOT NULL ,
 	controllingMinorFactionId	INT(11)		UNSIGNED	NOT NULL ,
