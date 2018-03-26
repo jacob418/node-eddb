@@ -44,7 +44,7 @@
 							task(connection,eachCb) ;
 						},
 						function(err){
-							connection.close() ;
+							connection.end() ;
 							if(err){
 								queueCb(err) ;
 							} else {
