@@ -8,7 +8,7 @@
 		"maxConnDuration": 10000,
 		"maxConnAmount": 3,
 		"maxQueriesParallel": 5,
-		"maxQueriesPerConn": 20
+		"maxQueriesPerConn": 50
 	},
 	"scheduler":{
 		"maxStackSize": 50,
