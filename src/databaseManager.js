@@ -516,8 +516,9 @@
 				// remove 'Pilots Federation Local Branch' since it has no influence
 				for(var a = 0; a < system.factions.length; a++) {
 					if(system.factions[a].influence === null) {
-						system.factions.splice(a, 1);
-						a--;	// reduce index by 1 to avoid unintended skipping of elements
+						system.factions[a].influence = 0 ;
+						//system.factions.splice(a, 1);
+						//a--;	// reduce index by 1 to avoid unintended skipping of elements
 					}
 				}
 
