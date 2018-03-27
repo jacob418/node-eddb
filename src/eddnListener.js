@@ -45,9 +45,9 @@
 							data.security		 	= content.SystemSecurity || null ;
 							data.state			 	= content.PowerplayState || "None" ;
 							data.economy		 	= content.SystemEconomy  || null ;
-							data.x				 	= content.StarPos[0] || null ;
-							data.y				 	= content.StarPos[1] || null ;
-							data.z				 	= content.StarPos[2] || null ;
+							data.x				 	= content.StarPos[0] || 0 ;
+							data.y				 	= content.StarPos[1] || 0 ;
+							data.z				 	= content.StarPos[2] || 0 ;
 							data.population		 	= content.Population || null ;
 							data.power		 		= (Array.isArray(content.Powers) ? content.Powers[0] : null) ;
 							data.powerState	 		= content.PowerplayState || null ;
