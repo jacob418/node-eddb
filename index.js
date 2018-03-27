@@ -32,7 +32,7 @@ const queryScheduler = require('./src/queryScheduler') ;
 		case 'listen':
 			var listener = new eddnListener({}) ;
 			listener.on('starSystem', function(data){
-				console.log("Recived Starsystem: '" + data.name + "' ...") ;
+				//console.log("Recived Starsystem: '" + data.name + "' ...") ;
 				databaseManager.updateStarSystem(data, function(err, data){
 					if(err) {
 						console.log("#####################") ;
@@ -41,7 +41,7 @@ const queryScheduler = require('./src/queryScheduler') ;
 						console.log("ERR: " + err.code);
 						console.log("#####################") ;
 					} else {
-						console.log("Saved Starsystem: '" + data.name + "' ...");
+						//console.log("Saved Starsystem: '" + data.name + "' ...");
 					}
 				}) ;
 			}) ;
