@@ -428,7 +428,8 @@
 					data.rulingFactionId	= resultSystem.rulingMinorFactionId ;
 					data.updatedAt		 	= resultSystem.updatedAt ;
 					data.security		 	= resultSystem.securityId ;
-					data.state			 	= resultSystem.powerStateId ;
+					data.powerStateId	 	= resultSystem.powerStateId ;
+					data.powerId			= resultSystem.powerId ;
 					data.economy		 	= resultSystem.economyId ;
 					data.x				 	= resultSystem.x ;
 					data.y				 	= resultSystem.y ;
@@ -479,7 +480,7 @@
 				system.y = data.y;
 				system.z = data.z;
 				system.population = data.population;
-				system.state = data.state;
+				system.state = data.powerState;
 				system.power = data.power;
 				system.economy = data.economy;
 				system.security = data.security;
@@ -543,9 +544,13 @@
 					} else {
 						system.securityId = results.securityId;
 						system.economyId = results.economyId;
-						system.powerId = results.powerId;
-						system.powerStateId = results.powerStateId;
-
+						if(!isNaN(parseInt(results.powerId))) {
+							system.powerId = results.powerId;
+							system.powerStateId = results.powerStateId;
+						} else if(isNaN(parseInt(system.id))) {		// init new system with null if power is not given
+							system.powerId = null;
+							system.stateStateId = null;
+						}
 
 						async.eachOf(system.factions, function (faction, key, eachOfCb) {
 							async.parallel({
