@@ -22,7 +22,9 @@
   "homepage": "https://github.com/jacob418/node-eddb#readme",
   "dependencies": {
     "async": "^2.6.0",
+    "file-stream-rotator": "^0.2.1",
     "hash-files": "^1.1.1",
+    "log": "^1.4.0",
     "merge-json": "0.1.0-b.3",
     "mysql": "^2.15.0",
     "request": "^2.83.0",

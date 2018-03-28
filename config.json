@@ -17,5 +17,15 @@
 	"eddb":{
 		"systems": "https://eddb.io/archive/v5/systems_populated.jsonl",
 		"factions":	"https://eddb.io/archive/v5/factions.jsonl"
+	},
+	"log":{
+		"logdir": "./" ,
+		"level": "info" ,
+		"frequency": "daily",
+		"verbose": false,
+		"date_format": "YYYYMMDD",
+		"size": "5m",
+		"max_logs": "7d",
+		"audit_file": "./.tmp/log-audit.json"
 	}
 }
