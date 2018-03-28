@@ -308,15 +308,16 @@
 					function(callback) {
 						retryCnt++ ;
 						if(retryCnt > 500){
+							this.setCache(type, name, null) ;
 							callback(new Error('max retry count reached'));
 						} else {
 							setTimeout(function () {
 								callback(null);
 							}, 250);
 						}
-					},
+					}.bind(this),
 					function (err) {
-						cb(err, this.getCache(type, name))
+						cb(err, this.getCache(type, name)) ;
 					}.bind(this));
 			} else {
 				cb(null, value);
@@ -383,13 +384,14 @@
 				function(callback) {
 					retryCnt++ ;
 					if(retryCnt > 500){
+						this.setCache("minorFaction", name, null) ;
 						callback(new Error('max retry count reached'));
 					} else {
 						setTimeout(function () {
 							callback(null);
 						}, 250);
 					}
-				},
+				}.bind(this),
 				function (err) {
 					cb(err, this.getCache("minorFaction", name)) ;
 				}.bind(this));
