@@ -45,7 +45,8 @@ const logger = require('log') ;
 		case 'listen':
 			var listener = new eddnListener({}) ;
 			listener.on('starSystem', function(data){
-				//console.log("Recived Starsystem: '" + data.name + "' ...") ;
+				var start = Date.now() ;
+				appLog.info("--- SYS --- received: '" + data.name + "'") ;
 				databaseManager.updateStarSystem(data, function(err, data){
 					if(err) {
 						console.log("#####################") ;
@@ -53,8 +54,9 @@ const logger = require('log') ;
 						console.log(err.sqlMessage);
 						console.log("ERR: " + err.code);
 						console.log("#####################") ;
+						appLog.warn("--- SYS --- error saving: '" + data.name + "' --- duration:" + (Date.now() - start).toString() + "ms");
 					} else {
-						//console.log("Saved Starsystem: '" + data.name + "' ...");
+						appLog.info("--- SYS --- saved: '" + data.name + "' --- duration:" + (Date.now() - start).toString() + "ms");
 					}
 				}) ;
 			}) ;
