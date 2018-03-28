@@ -49,12 +49,14 @@ const logger = require('log') ;
 				appLog.info("--- SYS --- received: '" + data.name + "'") ;
 				databaseManager.updateStarSystem(data, function(err, data){
 					if(err) {
-						console.log("#####################") ;
-						console.log(err.sql);
-						console.log(err.sqlMessage);
-						console.log("ERR: " + err.code);
-						console.log("#####################") ;
 						appLog.warn("--- SYS --- error saving: '" + data.name + "' --- duration:" + (Date.now() - start).toString() + "ms");
+						if(err.sql) {
+							errorLog.error("--- SQL --- CODE: " + err.code
+								+ " --- MSG: " + err.sqlMessage.replace(/[\r\n\t]/gi, "")
+								+ " --- Query: " + err.sql.replace(/[\r\n\t]/gi, ""));
+						} else {
+							errorLog.error("--- GEN --- ERR: " + err);
+						}
 					} else {
 						appLog.info("--- SYS --- saved: '" + data.name + "' --- duration:" + (Date.now() - start).toString() + "ms");
 					}
