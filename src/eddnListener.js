@@ -59,8 +59,8 @@
 									factionData.name				= content.Factions[i].Name;
 									factionData.allegiance			= content.Factions[i].Allegiance || null ;
 									factionData.goverment			= content.Factions[i].Government || null ;
-									factionData.influence			= content.Factions[i].Influence || null ;
-									factionData.state				= content.Factions[i].FactionState || null ;
+									factionData.influence			= content.Factions[i].Influence || 0 ;
+									factionData.state				= content.Factions[i].FactionState || "None" ;
 									factionData.recoveringState		= "None" ; // default value
 									factionData.recoveringStates	= [] ;
 									if (Array.isArray(content.Factions[i].RecoveringStates)) {
